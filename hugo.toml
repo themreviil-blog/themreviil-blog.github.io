@@ -1,0 +1,41 @@
+baseURL = 'http://localhost:1313/'
+languageCode = 'en-us'
+title = 'TheMrEviil Blog'
+theme = 'risotto'
+
+paginate = 3
+DefaultContentLanguage = "en"
+enableInlineShortcodes = true
+ignoreErrors = ["error-remote-getjson"]
+
+# Automatically add content sections to main menu
+sectionPagesMenu = "main"
+
+[params]
+noindex = false
+
+[params.theme]
+palette = "base16-dark"
+
+
+
+[params.about]
+title = "Jakub Przepióra"
+logo = ""
+
+[[params.socialLinks]]
+icon = "fa-brands fa-github"
+title = "GitHub"
+url = "https://github.com/jakub-przepiora"
+
+[[params.socialLinks]]
+icon = "fa-solid fa-envelope"
+title = "Email"
+url = "mailto:jakub.przepioraa@gmail.com"
+
+[[params.socialLinks]]
+icon = "fa-brands fa-linkedin"
+title = "Linkedin"
+url = "https://www.linkedin.com/in/jakub-przepiora/"
+
+

