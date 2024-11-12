@@ -3,6 +3,7 @@ date = '2024-11-11T14:14:28+01:00'
 draft = false
 title = 'BlueHens UDCTF 2024 - WriteUp'
 author = 'TheMrEviil'
+categories = ['writeups']
 +++
 
 

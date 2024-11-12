@@ -24,6 +24,7 @@ name = 'Jakub Przepióra'
 [params.about]
 title = "Jakub Przepióra"
 logo = ""
+description = "![my image](/post/my_image.png)"
 
 [[params.socialLinks]]
 icon = "fa-brands fa-github"
@@ -41,6 +42,17 @@ title = "Linkedin"
 url = "https://www.linkedin.com/in/jakub-przepiora/"
 
 [[params.socialLinks]]
+icon = "fa-brands fa-discord"
+title = "Linkedin"
+url = "https://discord.com/users/295690522146897920"
+
+[[params.socialLinks]]
+icon = "fa-brands fa-youtube"
+title = "Youtube"
+url = "https://www.youtube.com/@jakubprzepiora"
+
+
+[[params.socialLinks]]
 icon = "fa-solid fa-rss"
 title = "RSS"
 url = "/index.xml"
@@ -53,3 +65,22 @@ url = "/index.xml"
   term = ['html']
 
 copyright = '© 2024 TheMrEviil, Inc.'
+
+
+
+
+[menu]
+
+  [[menu.main]]
+    identifier = "Writeups"
+    name = "Writeups"
+    url = "/categories/writeups"
+    weight = 10
+
+
+    
+
+[taxonomies]
+category = "categories"
+tag = "tags"
+series = "series"
