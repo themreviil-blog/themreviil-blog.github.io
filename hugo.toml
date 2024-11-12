@@ -17,7 +17,9 @@ noindex = false
 [params.theme]
 palette = "base16-dark"
 
-
+[params.author]
+email = 'jakub.przepioraa@gmail.com'
+name = 'Jakub Przepióra'
 
 [params.about]
 title = "Jakub Przepióra"
@@ -38,4 +40,16 @@ icon = "fa-brands fa-linkedin"
 title = "Linkedin"
 url = "https://www.linkedin.com/in/jakub-przepiora/"
 
+[[params.socialLinks]]
+icon = "fa-solid fa-rss"
+title = "RSS"
+url = "/index.xml"
 
+
+[outputs]
+  home = ['html', 'rss']
+  section = ['html', 'rss']
+  taxonomy = ['html']
+  term = ['html']
+
+copyright = '© 2024 TheMrEviil, Inc.'
