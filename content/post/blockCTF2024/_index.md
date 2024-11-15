@@ -1,7 +1,7 @@
 +++
-date = '2024-11-15T23:01:28+01:00'
+date = '2024-11-15T12:53:25+01:00'
 draft = false
-title = 'BlockCTF 2024 - WriteUp'
+title = 'BlockCTF 2024 - writeup'
 author = 'TheMrEviil'
 categories = ['writeups']
 +++

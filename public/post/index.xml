@@ -2,20 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on TheMrEviil Blog</title>
-    <link>http://localhost:1313/post/</link>
+    <link>http://localhost:56163/post/</link>
     <description>Recent content in Posts on TheMrEviil Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <managingEditor>jakub.przepioraa@gmail.com (Jakub Przepióra)</managingEditor>
     <webMaster>jakub.przepioraa@gmail.com (Jakub Przepióra)</webMaster>
     <lastBuildDate>Mon, 11 Nov 2024 14:14:28 +0100</lastBuildDate>
-    <atom:link href="http://localhost:1313/post/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:56163/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>BlueHens UDCTF 2024 - WriteUp</title>
-      <link>http://localhost:1313/post/bluehens2024/bluehens-ctf-writeup/</link>
+      <link>http://localhost:56163/post/bluehens2024/bluehens-ctf-writeup/</link>
       <pubDate>Mon, 11 Nov 2024 14:14:28 +0100</pubDate><author>jakub.przepioraa@gmail.com (Jakub Przepióra)</author>
-      <guid>http://localhost:1313/post/bluehens2024/bluehens-ctf-writeup/</guid>
-      <description>&lt;h2 id=&#34;web---training-problem-intro-to-web&#34;&gt;WEB - Training Problem: Intro to Web&lt;/h2&gt;&#xA;&lt;p&gt;Description:&lt;/p&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;It&amp;#39;s nice to have some training problems.&#xA;&#xA;-ProfNinja&#xA;&#xA;https://bluehens-webstuff.chals.io/&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;After open website my Chrome extenstion DotGit notify me about avaible .git on this site&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/post/bluehens2024/dotgit.png&#34; alt=&#34;image dotgit&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;I downloaded this and start reading logs &lt;code&gt;git log&lt;/code&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/post/bluehens2024/gitlog.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;let&amp;rsquo;s check commit &amp;lsquo;password based login?&amp;rsquo;&#xA;&lt;img src=&#34;http://localhost:1313/post/bluehens2024/gitshow.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;We got MD5 hash go to crackstation and lat&amp;rsquo;s try crack password&#xA;&lt;img src=&#34;http://localhost:1313/post/bluehens2024/crackstation.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;After cract we have password &lt;code&gt;1qaz2wsx&lt;/code&gt; let&amp;rsquo;s go on page from code &lt;a href=&#34;https://bluehens-webstuff.chals.io/flagme.php?password=1qaz2wsx&#34;&gt;https://bluehens-webstuff.chals.io/flagme.php?password=1qaz2wsx&lt;/a&gt;&#xA;&lt;img src=&#34;http://localhost:1313/post/bluehens2024/url_flag.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;</description>
+      <guid>http://localhost:56163/post/bluehens2024/bluehens-ctf-writeup/</guid>
+      <description>&lt;h2 id=&#34;web---training-problem-intro-to-web&#34;&gt;WEB - Training Problem: Intro to Web&lt;/h2&gt;&#xA;&lt;p&gt;Description:&lt;/p&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;It&amp;#39;s nice to have some training problems.&#xA;&#xA;-ProfNinja&#xA;&#xA;https://bluehens-webstuff.chals.io/&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;After open website my Chrome extenstion DotGit notify me about avaible .git on this site&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;http://localhost:56163/post/bluehens2024/dotgit.png&#34; alt=&#34;image dotgit&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;I downloaded this and start reading logs &lt;code&gt;git log&lt;/code&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;http://localhost:56163/post/bluehens2024/gitlog.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;let&amp;rsquo;s check commit &amp;lsquo;password based login?&amp;rsquo;&#xA;&lt;img src=&#34;http://localhost:56163/post/bluehens2024/gitshow.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;We got MD5 hash go to crackstation and lat&amp;rsquo;s try crack password&#xA;&lt;img src=&#34;http://localhost:56163/post/bluehens2024/crackstation.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;After cract we have password &lt;code&gt;1qaz2wsx&lt;/code&gt; let&amp;rsquo;s go on page from code &lt;a href=&#34;https://bluehens-webstuff.chals.io/flagme.php?password=1qaz2wsx&#34;&gt;https://bluehens-webstuff.chals.io/flagme.php?password=1qaz2wsx&lt;/a&gt;&#xA;&lt;img src=&#34;http://localhost:56163/post/bluehens2024/url_flag.png&#34; alt=&#34;image gitlog&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
