@@ -28,8 +28,7 @@ For example:
 
 "0e12345" == "0" is true because "0e12345" is interpreted as 0.
 
-Popular hashes in PHP are MD5, SHA256 
-
+Common hashes in PHP are MD5 and SHA256. Here’s an example of a "magic hash" for SHA256:
 SHA256:
 `34250003024812:0e46289032038065916139621039085883773413820991920706299695051332`
 

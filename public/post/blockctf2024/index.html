@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=56240&amp;path=livereload" data-no-instant defer></script><title>BlockCTF 2024 - writeup &ndash; TheMrEviil Blog</title>
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=56360&amp;path=livereload" data-no-instant defer></script><title>BlockCTF 2024 - writeup &ndash; TheMrEviil Blog</title>
 <meta name="description" content="![my image](/post/my_image.png)">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,9 +15,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css" integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 
-<link rel="stylesheet" href="http://localhost:56240/css/palettes/base16-dark.css">
-<link rel="stylesheet" href="http://localhost:56240/css/risotto.css">
-<link rel="stylesheet" href="http://localhost:56240/css/custom.css">
+<link rel="stylesheet" href="http://localhost:56360/css/palettes/base16-dark.css">
+<link rel="stylesheet" href="http://localhost:56360/css/risotto.css">
+<link rel="stylesheet" href="http://localhost:56360/css/custom.css">
 
 
 
@@ -26,7 +26,7 @@
 
 
 
-<link rel="alternate" type="application/rss+xml" href="http://localhost:56240/post/blockctf2024/index.xml" title="TheMrEviil Blog">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:56360/post/blockctf2024/index.xml" title="TheMrEviil Blog">
 </head>
 
     <body>
@@ -34,12 +34,12 @@
 
             <header class="page__header"><nav class="page__nav main-nav">
     <ul>
-    <h1 class="page__logo"><a href="http://localhost:56240/" class="page__logo-inner">TheMrEviil Blog</a></h1>
+    <h1 class="page__logo"><a href="http://localhost:56360/" class="page__logo-inner">TheMrEviil Blog</a></h1>
     
     
-    <li class="main-nav__item"><a class="nav-main-item" href="http://localhost:56240/categories/writeups" title="">Writeups</a></li>
+    <li class="main-nav__item"><a class="nav-main-item" href="http://localhost:56360/categories/writeups" title="">Writeups</a></li>
     
-    <li class="main-nav__item"><a class="nav-main-item active" href="http://localhost:56240/post/" title="Posts">Posts</a></li>
+    <li class="main-nav__item"><a class="nav-main-item active" href="http://localhost:56360/post/" title="Posts">Posts</a></li>
     
     </ul>
 </nav>
@@ -64,8 +64,8 @@ In requests we find version PHP and Apache. Well&hellip; lets mix some params in
 <p>but in warning we have information about <code>hash()</code> function let&rsquo;s check magic hash. Concept takes advantage of this behavior by using special strings that, when compared to each other with ==, are evaluated as equal to each other (even though they may seem different). In particular, it uses strings that PHP will interpret as a number 0 during comparison.</p>
 <p>For example:</p>
 <p>&ldquo;0e12345&rdquo; == &ldquo;0&rdquo; is true because &ldquo;0e12345&rdquo; is interpreted as 0.</p>
-<p>Popular hashes in PHP are MD5, SHA256</p>
-<p>SHA256:
+<p>Common hashes in PHP are MD5 and SHA256. Here’s an example of a &ldquo;magic hash&rdquo; for SHA256:
+SHA256:
 <code>34250003024812:0e46289032038065916139621039085883773413820991920706299695051332</code></p>
 <p>and we got admin.
 Next step in url we can change user_id parameter. but not interesting, but when i add &ndash; we have SQL Syntax ERROR . AWESOME</p>
