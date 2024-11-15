@@ -5,7 +5,7 @@ title = 'BlockCTF 2024 - writeup'
 author = 'TheMrEviil'
 categories = ['writeups']
 +++
-
+![image dotgit](/post/blockctf2024/blockctf_logo.png)
 ## WEB: Juggl3r
 
 Description:

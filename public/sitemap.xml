@@ -2,29 +2,29 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:56163/</loc>
+    <loc>http://localhost:56240/</loc>
     <lastmod>2024-11-15T12:53:25+01:00</lastmod>
   </url><url>
-    <loc>http://localhost:56163/post/blockctf2024/</loc>
+    <loc>http://localhost:56240/post/blockctf2024/</loc>
     <lastmod>2024-11-15T12:53:25+01:00</lastmod>
   </url><url>
-    <loc>http://localhost:56163/categories/</loc>
+    <loc>http://localhost:56240/categories/</loc>
     <lastmod>2024-11-15T12:53:25+01:00</lastmod>
   </url><url>
-    <loc>http://localhost:56163/post/</loc>
+    <loc>http://localhost:56240/post/</loc>
     <lastmod>2024-11-15T12:53:25+01:00</lastmod>
   </url><url>
-    <loc>http://localhost:56163/categories/writeups/</loc>
+    <loc>http://localhost:56240/categories/writeups/</loc>
     <lastmod>2024-11-15T12:53:25+01:00</lastmod>
   </url><url>
-    <loc>http://localhost:56163/post/bluehens2024/bluehens-ctf-writeup/</loc>
+    <loc>http://localhost:56240/post/bluehens2024/bluehens-ctf-writeup/</loc>
     <lastmod>2024-11-11T14:14:28+01:00</lastmod>
   </url><url>
-    <loc>http://localhost:56163/about/</loc>
+    <loc>http://localhost:56240/about/</loc>
     <lastmod>2019-02-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:56163/series/</loc>
+    <loc>http://localhost:56240/series/</loc>
   </url><url>
-    <loc>http://localhost:56163/tags/</loc>
+    <loc>http://localhost:56240/tags/</loc>
   </url>
 </urlset>
