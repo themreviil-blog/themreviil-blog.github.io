@@ -26,3 +26,4 @@
 {{ with .OutputFormats.Get "rss" -}}
   {{ printf `<link rel=%q type=%q href=%q title=%q>` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
 {{ end }}
+<meta name="description" content="Welcome to my blog! I’m Jakub Przepióra, though online, many people know me as TheMrEviil. I am the CEO of Nice Code sp. z o.o., where we specialize in developing websites, online stores, bots, and web systems. Occasionally, we take on penetration testing projects, though it’s not our main focus.">
