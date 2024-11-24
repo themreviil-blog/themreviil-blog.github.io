@@ -2,7 +2,7 @@
 +++
 date = '2024-11-24T17:59:18+01:00'
 draft = false
-title = 'GlacierCTF 2024 - GlacierChat'
+title = 'GlacierCTF 2024 - GlacierChat - Writeup'
 author = 'TheMrEviil'
 categories = ['writeups']
 +++
